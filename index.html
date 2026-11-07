@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Water Tracker</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    padding: 30px;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+h1 {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    font-size: 28px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.progress-container {
+    margin-top: 25px;
+    background: #d1d5db;
+    height: 25px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #3b82f6;
+    transition: 0.3s;
+}
+
+.summary {
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+button {
+    border: none;
+    color: white;
+    padding: 15px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.add {
+    background: #2563eb;
+}
+
+.reset {
+    background: #4b5563;
+}
+
+.reminder {
+    background: #16a34a;
+}
+
+.history {
+    margin-top: 35px;
+}
+
+.history-box {
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 5px;
+    padding: 15px;
+    min-height: 50px;
+}
+
+li {
+    margin-bottom: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>💧 Water Tracker</h1>
+
+<label>Daily Goal (glasses)</label>
+<input type="number" id="goal" value="8">
+
+<div class="progress-container">
+    <div id="progressBar" class="progress-bar"></div>
+</div>
+
+<div id="summary" class="summary">0 / 8 glasses</div>
+
+<div class="buttons">
+    <button class="add" onclick="addGlass()">Add Glass</button>
+    <button class="reset" onclick="resetTracker()">Reset</button>
+    <button class="reminder" onclick="enableReminder()">
+        Enable 3-Hour Reminder
+    </button>
+</div>
+
+<div class="history">
+    <h2>Today's History</h2>
+
+    <div class="history-box">
+        <ul id="historyList">
+            <li>No entries yet.</li>
+        </ul>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+let glasses = 0;
+let reminderTimer;
+
+function updateDisplay() {
+
+    let goal =
+        parseInt(document.getElementById("goal").value) || 8;
+
+    document.getElementById("summary").innerText =
+        glasses + " / " + goal + " glasses";
+
+    let percent =
+        Math.min((glasses / goal) * 100, 100);
+
+    document.getElementById("progressBar").style.width =
+        percent + "%";
+}
+
+function addGlass() {
+
+    glasses++;
+
+    updateDisplay();
+
+    let list =
+        document.getElementById("historyList");
+
+    if (glasses === 1) {
+        list.innerHTML = "";
+    }
+
+    let li = document.createElement("li");
+
+    li.innerText =
+        "💧 " +
+        new Date().toLocaleTimeString();
+
+    list.prepend(li);
+}
+
+function resetTracker() {
+
+    glasses = 0;
+
+    document.getElementById("historyList").innerHTML =
+        "<li>No entries yet.</li>";
+
+    updateDisplay();
+}
+
+async function enableReminder() {
+
+    if (!("Notification" in window)) {
+        alert("Notifications not supported");
+        return;
+    }
+
+    let permission =
+        await Notification.requestPermission();
+
+    if (permission !== "granted") {
+        alert("Please allow notifications.");
+        return;
+    }
+
+    clearInterval(reminderTimer);
+
+    new Notification(
+        "💧 Water Reminder",
+        {
+            body: "Hydration reminders enabled."
+        }
+    );
+
+    reminderTimer = setInterval(() => {
+
+        new Notification(
+            "💧 Water Reminder",
+            {
+                body: "Time to drink a glass of water!"
+            }
+        );
+
+    }, 3 * 60 * 60 * 1000);
+
+    alert("3-hour reminders enabled.");
+}
+
+updateDisplay();
+
+</script>
+
+</body>
+</html>
